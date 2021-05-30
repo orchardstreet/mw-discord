@@ -169,9 +169,9 @@ class DiscordUtils {
 				}
 			}
 
-			$userPage = DiscordUtils::createMarkdownLink(	$user_abbr, ( $isAnon ? $contribs : $user->getUserPage() )->getFullUrl( '', '', $proto = PROTO_HTTP ) );
-			$userTalk = DiscordUtils::createMarkdownLink( wfMessage( 'discord-talk' )->text(), $user->getTalkPage()->getFullUrl( '', '', $proto = PROTO_HTTP ) );
-			$userContribs = DiscordUtils::createMarkdownLink( wfMessage( 'discord-contribs' )->text(), $contribs->getFullURL( '', '', $proto = PROTO_HTTP ) );
+			$userPage = DiscordUtils::createMarkdownLink(	$user_abbr, ( $isAnon ? $contribs : $user->getUserPage() )->getFullUrl([ '', '', $proto = PROTO_HTTP] ) );
+			$userTalk = DiscordUtils::createMarkdownLink( wfMessage( 'discord-talk' )->text(), $user->getTalkPage()->getFullUrl([ '', '', $proto = PROTO_HTTP] ) );
+			$userContribs = DiscordUtils::createMarkdownLink( wfMessage( 'discord-contribs' )->text(), $contribs->getFullURL([ '', '', $proto = PROTO_HTTP ]) );
 			$text = wfMessage( 'discord-userlinks', $userPage, $userTalk, $userContribs )->text();	
 		} else {
 			// If it's a string, which can be likely (for example when range blocking a user)
@@ -184,25 +184,28 @@ class DiscordUtils {
 	/**
 	 * Creates formatted text for a specific Revision object
 	 */
-	public static function createRevisionText ($revision) {
-		$diff = DiscordUtils::createMarkdownLink( wfMessage( 'discord-diff' )->text(), $revision->getTitle()->getFullUrl("diff=prev", ["oldid" => $revision->getID()], $proto = PROTO_HTTP) );
+	public static function createRevisionText ($revisionRecord) {
+//		$diff = DiscordUtils::createMarkdownLink( wfMessage( 'discord-diff' )->text(), $revisionRecord->getPageAsLinkTarget()->getFullUrl(["diff=prev", ["oldid" => $revision->getID()], $proto = PROTO_HTTP]) );
+		$diff = DiscordUtils::createMarkdownLink( wfMessage( 'discord-diff' )->text(), $revisionRecord->getPage()->getFullUrl(["diff=prev",["oldid" => $revisionRecord->getID()]]));
 		$minor = '';
 		$size = '';
-		if ( $revision->isMinor() ) {
+		if ( $revisionRecord->isMinor() ) {
 			$minor .= wfMessage( 'discord-minor' )->text();
 		}
-		$previous = $revision->getPrevious();
+		/*
+		$previous = $revisionRecord->getPrevious();
 		if ( $previous ) {
-			$size .= wfMessage( 'discord-size', sprintf( "%+d", $revision->getSize() - $previous->getSize() ) )->text();
-		} else if ( $revision->getParentId() ) {
-			// Try and get the parent revision based on the ID, if we can
-			$previous = Revision::newFromId( $revision->getParentId() );
+			$size .= wfMessage( 'discord-size', sprintf( "%+d", $revisionRecord->getSize() - $previous->getSize() ) )->text();
+		} else if ( $revisionRecord->getParentId() ) {
+			// Try and get the parent revisionRecord based on the ID, if we can
+			$previous = Revision::newFromId( $revisionRecord->getParentId() );
 			if ($previous) {
-				$size .= wfMessage( 'discord-size', sprintf( "%+d", $revision->getSize() - $previous->getSize() ) )->text();
+				$size .= wfMessage( 'discord-size', sprintf( "%+d", $revisionRecord->getSize() - $previous->getSize() ) )->text();
 			}
 		}
+		 */
 		if ( $size == '' ) {
-			$size .= wfMessage( 'discord-size', sprintf( "%d", $revision->getSize() ) )->text();
+			$size .= wfMessage( 'discord-size', sprintf( "%d", $revisionRecord->getSize() ) )->text();
 		}
 		$text = wfMessage( 'discord-revisionlinks', $diff, $minor, $size )->text();
 		return $text;
@@ -215,6 +218,10 @@ class DiscordUtils {
 		$url = str_replace(" ", "%20", $url);
 		$url = str_replace("(", "%28", $url);
 		$url = str_replace(")", "%29", $url);
+		$url = str_replace("%3D", "=", $url);
+		$url = str_replace("1%5B", "", $url);
+		$url = str_replace("%5D", "", $url);
+		$url = str_replace("&0=", "&", $url);
 		return $url;
 	}
 	

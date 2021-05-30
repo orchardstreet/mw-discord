@@ -10,45 +10,51 @@ class DiscordHooks {
 	 * Called when a page is created or edited
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/PageContentSaveComplete
 	 */
-	public static function onPageContentSaveComplete( &$wikiPage, &$user, $content, $summary, $isMinor, $isWatch, $section, &$flags, $revision, &$status, $baseRevId, $undidRevId ) {
+	public static function onPageSaveComplete( &$wikiPage, &$user, $summary, $flags,$revisionRecord, $editResult ) {
 		global $wgDiscordNoBots, $wgDiscordNoMinor, $wgDiscordNoNull;
-		$hookName = 'PageContentSaveComplete';
+		$status = new Status;
+		$hookName = 'PageSaveComplete';
 
-		if ( DiscordUtils::isDisabled( $hookName, $wikiPage->getTitle()->getNamespace(), $user ) ) {
-			return true;
-		}
+//		if ( DiscordUtils::isDisabled( $hookName, $wikiPage->getTitle()->getNamespace(), $user ) ) {
+//			return true;
+//		}
 
-		if ( $wgDiscordNoBots && $user->isBot() ) {
+//		if ( $wgDiscordNoBots && $user->isBot() ) {
 			// Don't continue, this is a bot edit
-			return true;
-		}
+//			return true;
+//		}
 
-		if ( $wgDiscordNoMinor && $isMinor ) {
+//		if ( $wgDiscordNoMinor && $isMinor ) {
 			// Don't continue, this is a minor edit
-			return true;
-		}
+//			return true;
+//		}
 
-		if ( $wgDiscordNoNull && ( !$revision || is_null( $status->getValue()['revision'] ) ) ) {
+//		if ( $wgDiscordNoNull && ( !$revision || is_null( $status->getValue()['revision'] ) ) ) {
 			// Don't continue, this is a null edit
-			return true;
-		}
+//			return true;
+//		}
 
-		if ( $wikiPage->getTitle()->inNamespace( NS_FILE ) && is_null( $revision->getPrevious() ) ) {
-			// Don't continue, it's a new file which onUploadComplete will handle instead
-			return true;
-		}
+//		if ( $wikiPage->getTitle()->inNamespace( NS_FILE ) && is_null( $revision->getPrevious() ) ) {
+//			// Don't continue, it's a new file which onUploadComplete will handle instead
+//			return true;
+//		}
 
 		$msgKey = 'discord-edit';
 
-		$isNew = $status->value['new'];
-		if ($isNew == 1) { // is a new page
-			$msgKey = 'discord-create';
-		}
+//		$isNew = $status->value['new'];
+//		if ($isNew == 1) { // is a new page
+//			$msgKey = 'discord-create';
+//		}
 
+//		$msg = wfMessage( $msgKey, DiscordUtils::createUserLinks( $user ),
+//			DiscordUtils::createMarkdownLink( $wikiPage->getTitle(), $wikiPage->getTitle()->getFullUrl( ['', '', $proto = PROTO_HTTP] ) ),
+//			DiscordUtils::createRevisionText( $revisionRecord ),
+//			( $summary ? ('`' . DiscordUtils::sanitiseText( DiscordUtils::truncateText( $summary ) ) . '`' ) : '' ) )->plain();
 		$msg = wfMessage( $msgKey, DiscordUtils::createUserLinks( $user ),
-			DiscordUtils::createMarkdownLink( $wikiPage->getTitle(), $wikiPage->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			DiscordUtils::createRevisionText( $revision ),
-			( $summary ? ('`' . DiscordUtils::sanitiseText( DiscordUtils::truncateText( $summary ) ) . '`' ) : '' ) )->plain();
+			DiscordUtils::createMarkdownLink( $wikiPage->getTitle(), $wikiPage->getTitle()->getFullUrl( ['', '', $proto = PROTO_HTTP] ) ),DiscordUtils::createRevisionText($revisionRecord),( $summary ? ('`' . DiscordUtils::sanitiseText( DiscordUtils::truncateText( $summary ) ) . '`' ) : '' ) )->plain();
+		$myfile = fopen("logs7.txt", "wr") or die("Unable to open file!");
+		fwrite($myfile,$revisionRecord->getPage());
+		fclose($myfile);
 		DiscordUtils::handleDiscord($hookName, $msg);
 		return true;
 	}
@@ -71,7 +77,7 @@ class DiscordHooks {
 		}
 
 		$msg = wfMessage( 'discord-articledelete', DiscordUtils::createUserLinks( $user ),
-			DiscordUtils::createMarkdownLink( $article->getTitle(), $article->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
+			DiscordUtils::createMarkdownLink( $article->getTitle(), $article->getTitle()->getFullUrl([ '', '', $proto = PROTO_HTTP ]) ),
 			( $reason ? ('`' . DiscordUtils::sanitiseText( DiscordUtils::truncateText( $reason ) ) . '`' ) : '' ),
 			$archivedRevisionCount)->plain();
 		DiscordUtils::handleDiscord($hookName, $msg);
@@ -246,6 +252,9 @@ class DiscordHooks {
 	public static function onUserGroupsChanged( User $user, array $added, array $removed, $performer, $reason ) {
 		$hookName = 'UserGroupsChanged';
 
+		$myfile = fopen("logs5.txt", "wr");
+		fwrite($myfile, "user: " . $user . " added: " . $added . " removed: " . $removed . " performer: " . $performer . " reason: "  . $reason);
+		fclose($myfile);
 		if ( DiscordUtils::isDisabled( $hookName, NULL, $performer ) ) {
 			return true;
 		}

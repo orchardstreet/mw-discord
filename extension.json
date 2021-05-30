@@ -23,7 +23,7 @@
 		"DiscordUseFileGetContents": false,
 		"DiscordUseEmojis": false,
 		"DiscordEmojis": {
-			"PageContentSaveComplete": ":pencil2:",
+			"PageSaveComplete": ":pencil2:",
 			"ArticleDeleteComplete": ":wastebasket:",
 			"ArticleUndelete": ":wastebasket:",
 			"ArticleRevisionVisibilitySet": ":spy:",
@@ -52,7 +52,7 @@
 		"mw-discord": "i18n"
 	},
 	"Hooks": {
-		"PageContentSaveComplete": "DiscordHooks::onPageContentSaveComplete",
+		"PageSaveComplete": "DiscordHooks::onPageSaveComplete",
 		"ArticleDeleteComplete": "DiscordHooks::onArticleDeleteComplete",
 		"ArticleUndelete": "DiscordHooks::onArticleUndelete",
 		"ArticleRevisionVisibilitySet": "DiscordHooks::onArticleRevisionVisibilitySet",
