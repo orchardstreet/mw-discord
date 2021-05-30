@@ -52,9 +52,6 @@ class DiscordHooks {
 //			( $summary ? ('`' . DiscordUtils::sanitiseText( DiscordUtils::truncateText( $summary ) ) . '`' ) : '' ) )->plain();
 		$msg = wfMessage( $msgKey, DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $wikiPage->getTitle(), $wikiPage->getTitle()->getFullUrl( ['', '', $proto = PROTO_HTTP] ) ),DiscordUtils::createRevisionText($revisionRecord),( $summary ? ('`' . DiscordUtils::sanitiseText( DiscordUtils::truncateText( $summary ) ) . '`' ) : '' ) )->plain();
-		$myfile = fopen("logs7.txt", "wr") or die("Unable to open file!");
-		fwrite($myfile,$revisionRecord->getPage());
-		fclose($myfile);
 		DiscordUtils::handleDiscord($hookName, $msg);
 		return true;
 	}
@@ -252,9 +249,6 @@ class DiscordHooks {
 	public static function onUserGroupsChanged( User $user, array $added, array $removed, $performer, $reason ) {
 		$hookName = 'UserGroupsChanged';
 
-		$myfile = fopen("logs5.txt", "wr");
-		fwrite($myfile, "user: " . $user . " added: " . $added . " removed: " . $removed . " performer: " . $performer . " reason: "  . $reason);
-		fclose($myfile);
 		if ( DiscordUtils::isDisabled( $hookName, NULL, $performer ) ) {
 			return true;
 		}
